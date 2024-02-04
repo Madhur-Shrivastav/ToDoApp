@@ -37,7 +37,7 @@ const htmlTaskContent = (task = { id, title, description, type, url }) => `
             </div>
             </div>
             <div class="card-footer">
-                <button type="button" class="btn btn-outline-primary float-right" data-bs-toggle="modal" data-bs-target="#showTask" id=${
+                <button type="button" class="btn btn-outline-primary float-right" data-bs-toggle="modal" data-bs-target="#showTask" name=${
                   task.id
                 } onclick='openTask.apply(this, arguments)'>
                     Open Task
@@ -110,7 +110,26 @@ const openTask = (event) => {
     event = window.event;
   }
 
-  const getTask = state.taskList.find(({ id }) => id === event.target.id);
+  const targetId = event.target.getAttribute("name");
+  console.log(targetId);
+  console.log(state);
+  const getTask = state.taskList.filter(function (id) {
+    id === targetId;
+  });
+  // const getTask = [];
+  // for (let i = 0; i < state.taskList.length; i++) {
+  // if (state.taskList[i].id === targetId) {
+  // getTask.push(state.taskList[i]);
+  // }
+  // }
+  // const getTask = [];
+  // state.taskList.forEach(function (task) {
+  // if (task.id === targetId) {
+  // getTask.push(task);
+  // }
+  // });
+
+  console.log(getTask);
   taskModal.innerHTML = htmlModalContent(getTask);
 };
 
@@ -122,8 +141,11 @@ const deleteTask = (event) => {
   const targetId = event.target.getAttribute("name");
   const type = event.target.tagName;
 
-  const removeTask = state.taskList.filter(({ id }) => id !== targetId);
-  state.taskList = removeTask;
+  const newTaskList = state.taskList.filter(function (id) {
+    id !== targetId;
+  });
+  state.taskList = newTaskList;
+  console.log(state);
 
   updateLocalStorage();
 
