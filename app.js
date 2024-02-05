@@ -52,9 +52,9 @@ const htmlModalContent = (task = { id, title, description, url }) => {
   return `
     <div id=${task.id}>
      ${
-       task.url
+       task.url !== ""
          ? `<img width="100%" src=${task.url} alt="card image cap" class="img-fluid md-3 rounded-lg"/>`
-         : `<img width="100%" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAACUC.../>`
+         : `<img width="100%" src="./blockchain.jpg" alt="card image cap" class="img-fluid md-3 rounded-lg"/>`
      }
             <strong class="text-sm text-muted">Created on ${date.toDateString()}</strong>
             <h2 class="my-3">${task.title}</h2>
@@ -73,12 +73,18 @@ const updateLocalStorage = () => {
 };
 
 const loadInitialData = () => {
+  if (localStorage.task === "{}") {
+    localStorage.removeItem("task");
+  }
   if (localStorage.task) {
     console.log("localStorage.task:", localStorage.task);
     const localStorageCopy = JSON.parse(localStorage.task);
     state.taskList = localStorageCopy.tasks;
 
     state.taskList.forEach((task) => {
+      if (task.url === "") {
+        task.url = "./blockchain.jpg";
+      }
       taskContents.insertAdjacentHTML("beforeend", htmlTaskContent(task));
     });
 
@@ -110,27 +116,23 @@ const openTask = (event) => {
     event = window.event;
   }
 
-  const targetId = event.target.getAttribute("name");
-  console.log(targetId);
-  console.log(state);
-  const getTask = state.taskList.filter(function (id) {
-    id === targetId;
+  const targetId = parseInt(event.target.getAttribute("name"));
+  console.log(typeof targetId);
+  console.log(typeof state.taskList[0].id);
+
+  let getTask = state.taskList.find(function (task) {
+    return targetId === task.id;
   });
-  // const getTask = [];
-  // for (let i = 0; i < state.taskList.length; i++) {
-  // if (state.taskList[i].id === targetId) {
-  // getTask.push(state.taskList[i]);
-  // }
-  // }
-  // const getTask = [];
-  // state.taskList.forEach(function (task) {
-  // if (task.id === targetId) {
-  // getTask.push(task);
-  // }
+
+  // const targetId = (event.target.getAttribute("name"));
+  // console.log(typeof targetId);
+  // console.log(typeof state.taskList[0].id);
+  // let getTask = state.taskList.find(function (task) {
+  // return targetId == task.id; // dont compare the data
   // });
 
   console.log(getTask);
-  taskModal.innerHTML = htmlModalContent(getTask);
+  taskModal.innerHTML = htmlModalContent(getTask); // Note: Wrapping getTask in an array as htmlModalContent expects an array
 };
 
 const deleteTask = (event) => {
@@ -138,14 +140,14 @@ const deleteTask = (event) => {
     event = window.event;
   }
 
-  const targetId = event.target.getAttribute("name");
+  const targetId = parseInt(event.target.getAttribute("name"));
   const type = event.target.tagName;
 
-  const newTaskList = state.taskList.filter(function (id) {
-    id !== targetId;
+  const newTaskList = state.taskList.filter(function (task) {
+    return task.id !== targetId;
   });
   state.taskList = newTaskList;
-  console.log(state);
+  console.log(state.taskList);
 
   updateLocalStorage();
 
@@ -191,4 +193,11 @@ const editTask = (e) => {
   submitButton.removeAttribute("data-bs-toggle");
   submitButton.removeAttribute("data-bs-target");
   submitButton.innerHTML = "Save Changes";
+};
+
+const saveEdit = (event) => {
+  if (!event) {
+    event = window.event;
+  }
+  const targetId = event.target.id;
 };
