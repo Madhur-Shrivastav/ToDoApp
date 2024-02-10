@@ -76,13 +76,20 @@ const loadInitialData = () => {
   if (localStorage.task === "{}") {
     localStorage.removeItem("task");
   }
+
   if (localStorage.task) {
     console.log("localStorage.task:", localStorage.task);
     const localStorageCopy = JSON.parse(localStorage.task);
     state.taskList = localStorageCopy.tasks;
+    state.taskList = state.taskList.filter((task) => task !== null);
+    console.log(state.taskList);
 
     state.taskList.forEach((task) => {
+      // if (task === null) {
+      // return;
+      // }
       if (task.url === "") {
+        // Check if task is defined before accessing its properties
         task.url = "./blockchain.jpg";
       }
       taskContents.insertAdjacentHTML("beforeend", htmlTaskContent(task));
@@ -117,22 +124,15 @@ const openTask = (event) => {
   }
 
   const targetId = parseInt(event.target.getAttribute("name"));
-  console.log(typeof targetId);
-  console.log(typeof state.taskList[0].id);
+  //console.log(typeof targetId);
+  //console.log(typeof state.taskList[0].id);
 
   let getTask = state.taskList.find(function (task) {
     return targetId === task.id;
   });
 
-  // const targetId = (event.target.getAttribute("name"));
-  // console.log(typeof targetId);
-  // console.log(typeof state.taskList[0].id);
-  // let getTask = state.taskList.find(function (task) {
-  // return targetId == task.id; // dont compare the data
-  // });
-
   console.log(getTask);
-  taskModal.innerHTML = htmlModalContent(getTask); // Note: Wrapping getTask in an array as htmlModalContent expects an array
+  taskModal.innerHTML = htmlModalContent(getTask);
 };
 
 const deleteTask = (event) => {
@@ -162,11 +162,13 @@ const deleteTask = (event) => {
   }
 };
 
-const editTask = (e) => {
-  if (!e) e = window.event;
+const editTask = (event) => {
+  if (!event) {
+    event = window.event;
+  }
 
-  const targetId = e.target.id;
-  const type = e.target.tagName;
+  const targetId = event.target.id;
+  const type = event.target.tagName;
 
   let parentNode;
   let taskTitle;
@@ -175,9 +177,9 @@ const editTask = (e) => {
   let submitButton;
 
   if (type === "BUTTON") {
-    parentNode = e.target.parentNode.parentNode;
+    parentNode = event.target.parentNode.parentNode;
   } else {
-    parentNode = e.target.parentNode.parentNode.parentNode;
+    parentNode = event.target.parentNode.parentNode.parentNode;
   }
 
   taskTitle = parentNode.querySelector(".card-title");
@@ -199,5 +201,73 @@ const saveEdit = (event) => {
   if (!event) {
     event = window.event;
   }
-  const targetId = event.target.id;
+
+  let parentNode;
+  if (event.target.tagName === "BUTTON") {
+    parentNode = event.target.parentNode.parentNode;
+  } else {
+    parentNode = event.target.parentNode.parentNode.parentNode;
+  }
+  taskTitle = parentNode.querySelector(".card-title");
+  taskDescription = parentNode.querySelector(".card-title.trim-3-lines");
+  tags = parentNode.querySelector(".tags .badge");
+  submitButton = parentNode.querySelector(".btn-outline-primary");
+
+  const targetId = parseInt(event.target.id);
+
+  const updatedData = {
+    title: taskTitle.innerHTML,
+    description: taskDescription.innerHTML,
+    type: tags.innerHTML,
+  };
+
+  console.log(updatedData);
+
+  state.taskList.forEach(function (task) {
+    if (targetId === task.id) {
+      task.title = updatedData.title;
+      task.description = updatedData.description;
+      task.type = updatedData.type;
+    }
+  });
+
+  // let tasks = state.taskList.map((task) => {
+  // return targetId === task.id
+  // ? {
+  // ...task,
+  // ...updatedData,
+  // }
+  // : task;
+  // });
+
+  // console.log(tasks);
+  //state.taskList = tasks;
+  console.log(state.taskList);
+  updateLocalStorage();
+
+  taskTitle.setAttribute("contenteditable", "false");
+  taskDescription.setAttribute("contenteditable", "false");
+  tags.setAttribute("contenteditable", "false");
+
+  submitButton.setAttribute("onclick", "openTask.apply(this, arguments)");
+  submitButton.setAttribute("data-bs-toggle", "modal");
+  submitButton.setAttribute("data-bs-target", "#showTask");
+  submitButton.innerHTML = "Open Task";
 };
+
+// const searchTask = (e) => {
+// if (!e) e = window.event;
+//
+// while (taskContents.firstChild) {
+// taskContents.removeChild(taskContents.firstChild);
+// }
+//
+// const resultData = state.taskList.filter(({ title }) =>
+// title.includes(e.target.value)
+// );
+//
+// console.log(resultData);
+// resultData.map((cardData) => {
+// taskContents.insertAdjacentHTML("beforeend", htmlTaskContent(cardData));
+// });
+// };
