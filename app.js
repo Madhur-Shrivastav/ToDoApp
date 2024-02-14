@@ -92,7 +92,7 @@ const loadInitialData = () => {
         // Check if task is defined before accessing its properties
         task.url = "./blockchain.jpg";
       }
-      taskContents.insertAdjacentHTML("beforeend", htmlTaskContent(task));
+      taskContents.insertAdjacentHTML("beforeend", htmlTaskContent(task)); //Make the html of the task content container that htmlTaskContent(task) function is returning
     });
 
     console.log(state.taskList);
@@ -113,7 +113,7 @@ const handleSubmit = () => {
   taskContents.insertAdjacentHTML(
     "beforeend",
     htmlModalContent({ ...input, id })
-  );
+  ); //Make the html of the task content container that htmlTaskContent(task) function is returning
   state.taskList.push({ ...input, id });
   updateLocalStorage();
 };
@@ -132,7 +132,7 @@ const openTask = (event) => {
   });
 
   console.log(getTask);
-  taskModal.innerHTML = htmlModalContent(getTask);
+  taskModal.innerHTML = htmlModalContent(getTask); //Make the html of the show task modal that htmlModalContent(getTask) function is returning
 };
 
 const deleteTask = (event) => {
